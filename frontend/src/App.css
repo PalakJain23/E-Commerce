@@ -1,0 +1,236 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: linear-gradient(135deg, #fff7ed, #fed7aa, #fb923c);
+  min-height: 100vh;
+}
+
+.app {
+  padding: 35px;
+}
+
+.hero,
+.manager-title {
+  text-align: center;
+  color: #431407;
+}
+
+.hero h1,
+.manager-title h1 {
+  font-size: 44px;
+  margin-bottom: 8px;
+}
+
+.hero p,
+.manager-title p {
+  color: #7c2d12;
+  font-weight: 500;
+}
+
+.menu-section {
+  max-width: 900px;
+  margin: 25px auto 50px;
+}
+
+.menu-card,
+.card {
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 22px;
+  padding: 28px;
+  box-shadow: 0 20px 50px rgba(124, 45, 18, 0.25);
+}
+
+.menu-card h2,
+.card h2 {
+  margin-top: 0;
+  color: #431407;
+}
+
+.tree {
+  margin-top: 20px;
+}
+
+.tree-item {
+  margin: 8px 0;
+}
+
+.tree-row {
+  padding: 13px 16px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: 0.2s;
+}
+
+.tree-row:hover {
+  background: #ffedd5;
+  transform: translateX(4px);
+}
+
+.arrow {
+  font-weight: bold;
+  color: #ea580c;
+  width: 20px;
+}
+
+.tree-name {
+  font-weight: 700;
+  color: #431407;
+}
+
+.dashboard {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 25px;
+  max-width: 1200px;
+  margin: auto;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  margin: 14px 0 6px;
+  font-weight: 700;
+  color: #7c2d12;
+}
+
+input,
+select {
+  padding: 13px;
+  border: 1px solid #fdba74;
+  border-radius: 12px;
+  outline: none;
+  font-size: 15px;
+}
+
+input:focus,
+select:focus {
+  border-color: #ea580c;
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.18);
+}
+
+.btn-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+button {
+  border: none;
+  cursor: pointer;
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+.primary-btn {
+  flex: 1;
+  padding: 13px;
+  background: linear-gradient(135deg, #f97316, #c2410c);
+  color: white;
+}
+
+.cancel-btn {
+  padding: 13px 18px;
+  background: #78716c;
+  color: white;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.table-header span {
+  background: #ffedd5;
+  color: #c2410c;
+  padding: 8px 14px;
+  border-radius: 30px;
+  font-weight: 800;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 18px;
+}
+
+th {
+  background: #431407;
+  color: white;
+  padding: 14px;
+  text-align: left;
+}
+
+td {
+  padding: 14px;
+  border-bottom: 1px solid #fed7aa;
+  color: #431407;
+}
+
+tr:hover {
+  background: #fff7ed;
+}
+
+.category-name {
+  font-weight: 800;
+}
+
+.parent-badge,
+.child-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.parent-badge {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.child-badge {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.edit-btn {
+  padding: 8px 12px;
+  background: #facc15;
+  color: #431407;
+  margin-right: 8px;
+}
+
+.delete-btn {
+  padding: 8px 12px;
+  background: #dc2626;
+  color: white;
+}
+
+.empty {
+  text-align: center;
+  color: #9a3412;
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .hero h1,
+  .manager-title h1 {
+    font-size: 32px;
+  }
+}
