@@ -1,141 +1,380 @@
-# Restaurant Category CRUD System
+# 🛒 Amazon Style Product Management System
 
-A full-stack Restaurant Category Management System built using React, Node.js, Express.js, and MongoDB.
+A full-stack Amazon-inspired Product Management System built using **React.js, Node.js, Express.js, MongoDB, and Multer**. The platform allows administrators to manage hierarchical categories, products, multiple product images, and publishing workflows while providing customers with a clean product browsing experience.
 
-## Features
+---
 
-* Create Categories
-* Read Categories
-* Update Categories
-* Delete Categories
-* Parent & Child Category Support
-* Hierarchical Menu Structure
-* Interactive Category Tree View
-* Restaurant Menu Management Dashboard
-* MongoDB Database Integration
-* REST API Architecture
+## 🚀 Features
 
-## Example Hierarchy
+### 📂 Category Management
+
+- Create Categories
+- Update Categories
+- Delete Categories
+- Parent-Child Category Hierarchy
+- Nested Category Support
+
+Example:
 
 ```text
-Drinks
-├── Cold Drinks
-│   ├── Mojito
-│   ├── Shakes
-│   └── Soft Drinks
+Electronics
 │
-└── Hot Drinks
-    ├── Tea
-    └── Coffee
+├── Mobiles
+│
+├── Laptops
+│
+└── Earbuds
 ```
 
-## Tech Stack
+---
 
-### Frontend
+### 📦 Product Management
 
-* React.js
-* Axios
-* CSS3
+- Add Products
+- Update Products
+- Delete Products
+- Product Stock Management
+- Product Description Management
+- Product Brand Management
+- Product Features Management
+- Product Colors Management
 
-### Backend
+---
 
-* Node.js
-* Express.js
+### 🏷 Multiple Category Mapping
 
-### Database
+A product can belong to multiple categories.
 
-* MongoDB
-* Mongoose
+Example:
 
-## API Endpoints
+```text
+iPhone 15
 
-### Create Category
+Categories:
+- Electronics
+- Mobiles
+- Apple
+```
+
+---
+
+### 🖼 Product Image Management
+
+- Upload Multiple Images
+- One Image Upload at a Time
+- Delete Images
+- Reorder Images
+- Product Image Gallery
+
+Example:
+
+```text
+Image 1
+Image 2
+Image 3
+Image 4
+```
+
+Admin can:
+
+- Upload Images
+- Delete Images
+- Move Images Up
+- Move Images Down
+
+---
+
+### 🌐 Product Publishing Workflow
+
+Products are initially created as drafts.
+
+Workflow:
+
+```text
+Create Product
+        ↓
+Upload Images
+        ↓
+Add Product To Website
+        ↓
+Published
+```
+
+Only published products are visible to customers.
+
+---
+
+### 👨‍💼 Admin Dashboard
+
+Admin can:
+
+- Manage Categories
+- Manage Products
+- Upload Product Images
+- Reorder Product Images
+- Publish Products
+- Delete Products
+
+---
+
+### 👨‍💻 Customer Dashboard
+
+Customers can:
+
+- View Published Products
+- Browse Product Images
+- Navigate Through Product Image Slider
+- View Product Details
+
+---
+
+## 🏗 System Architecture
+
+```text
+React Frontend
+       │
+       │
+ REST APIs
+       │
+       │
+Node.js + Express
+       │
+       │
+MongoDB Atlas
+```
+
+---
+
+## 📊 Database Design
+
+### Category Schema
+
+```js
+{
+  name: String,
+  parentCategory: ObjectId
+}
+```
+
+Example:
+
+```json
+{
+  "name": "Mobiles",
+  "parentCategory": "electronics_id"
+}
+```
+
+---
+
+### Product Schema
+
+```js
+{
+  name: String,
+  price: Number,
+  brand: String,
+  description: String,
+  stock: Number,
+
+  categories: [
+    ObjectId
+  ],
+
+  features: [String],
+  colors: [String],
+
+  images: [
+    {
+      url: String,
+      filename: String,
+      order: Number
+    }
+  ],
+
+  isPublished: Boolean
+}
+```
+
+---
+
+## 🔗 API Endpoints
+
+### Category APIs
+
+#### Create Category
 
 ```http
 POST /api/categories
 ```
 
-### Get All Categories
+#### Get Categories
 
 ```http
 GET /api/categories
 ```
 
-### Update Category
+#### Update Category
 
 ```http
 PUT /api/categories/:id
 ```
 
-### Delete Category
+#### Delete Category
 
 ```http
 DELETE /api/categories/:id
 ```
 
-## Installation
+---
 
-### Clone Repository
+### Product APIs
 
-```bash
-git clone <repository-url>
+#### Create Product
+
+```http
+POST /api/products
 ```
 
-### Backend Setup
+#### Get Products
 
-```bash
-cd backend
-npm install
-npm run dev
+```http
+GET /api/products
 ```
 
-### Frontend Setup
+#### Update Product
 
-```bash
-cd frontend
-npm install
-npm start
+```http
+PUT /api/products/:id
 ```
 
-## Environment Variables
+#### Delete Product
 
-Create a `.env` file inside the backend folder:
-
-```env
-PORT=5000
-MONGO_URI=your_mongodb_connection_string
+```http
+DELETE /api/products/:id
 ```
 
-## Project Structure
+---
 
-```text
-restaurant-category-crud
-│
-├── backend
-│   ├── controllers
-│   ├── models
-│   ├── routes
-│   └── server.js
-│
-├── frontend
-│   ├── src
-│   ├── public
-│   └── package.json
-│
-└── README.md
+### Image APIs
+
+#### Upload Product Image
+
+```http
+POST /api/products/:id/images
 ```
 
-## Future Enhancements
+#### Delete Product Image
 
-* Food Item Management
-* Image Upload Support
-* Authentication & Authorization
-* Search & Filtering
-* Drag-and-Drop Category Management
-* Restaurant Menu Page for Customers
+```http
+DELETE /api/products/:productId/images/:imageId
+```
 
-## Author
+#### Move Image Up
 
-Palak Jain
-Integrated M.Tech (AI)
+```http
+PUT /api/products/:productId/images/:imageId/up
+```
+
+#### Move Image Down
+
+```http
+PUT /api/products/:productId/images/:imageId/down
+```
+
+---
+
+### Publish Product
+
+```http
+PUT /api/products/:id/publish
+```
+
+---
+
+## 🛠 Tech Stack
+
+### Frontend
+
+- React.js
+- Axios
+- CSS3
+
+### Backend
+
+- Node.js
+- Express.js
+
+### Database
+
+- MongoDB Atlas
+- Mongoose
+
+### File Upload
+
+- Multer
+
+---
+
+## 📸 Screenshots
+
+### Admin Dashboard
+
+- Category Management
+- Product Management
+- Image Upload Management
+- Product Publishing
+
+### Customer Dashboard
+
+- Product Cards
+- Product Image Slider
+- Product Details
+
+---
+
+## 🎯 Learning Outcomes
+
+This project helped in understanding:
+
+- Full Stack Development
+- REST API Design
+- CRUD Operations
+- MongoDB Relationships
+- Parent-Child Category Hierarchy
+- Multiple Category Mapping
+- File Upload Handling
+- Product Publishing Workflow
+- Image Management System
+- E-Commerce Application Design
+
+---
+
+## 🚀 Future Enhancements
+
+- User Authentication & Authorization
+- Shopping Cart
+- Wishlist
+- Product Search
+- Product Filters
+- Product Reviews & Ratings
+- Order Management
+- Payment Gateway Integration
+- Admin Analytics Dashboard
+- Cloudinary Image Storage
+- Role-Based Access Control
+
+---
+
+## 👨‍💻 Author
+
+**Palak Jain**
+
+Integrated M.Tech AI Student  
 VIT Bhopal University
+
+---
+
+## ⭐ If you like this project
+
+Give this repository a star ⭐ and support the project.
