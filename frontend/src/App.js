@@ -2,239 +2,466 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import "./App.css";
 
-const API_URL = "http://localhost:5000/api/categories";
+const CATEGORY_API = "http://localhost:5000/api/categories";
+const PRODUCT_API = "http://localhost:5000/api/products";
+
+function CustomerProductCard({ item }) {
+  const [currentImage, setCurrentImage] = useState(0);
+
+  const nextImage = () => {
+    if (!item.images || item.images.length === 0) return;
+
+    setCurrentImage((prev) =>
+      prev === item.images.length - 1 ? 0 : prev + 1
+    );
+  };
+
+  const prevImage = () => {
+    if (!item.images || item.images.length === 0) return;
+
+    setCurrentImage((prev) =>
+      prev === 0 ? item.images.length - 1 : prev - 1
+    );
+  };
+
+  return (
+    <div className="customer-card">
+      {item.images && item.images.length > 0 && (
+        <>
+          <div className="banner-slider">
+            <button className="nav-arrow left-arrow" onClick={prevImage}>
+              ❮
+            </button>
+
+            <img
+              src={item.images[currentImage]?.url}
+              alt={item.name}
+              className="banner-image"
+            />
+
+            <button className="nav-arrow right-arrow" onClick={nextImage}>
+              ❯
+            </button>
+          </div>
+
+          <div className="dots">
+            {item.images.map((_, index) => (
+              <span
+                key={index}
+                className={currentImage === index ? "dot active-dot" : "dot"}
+                onClick={() => setCurrentImage(index)}
+              ></span>
+            ))}
+          </div>
+        </>
+      )}
+
+      <h3>{item.name}</h3>
+      <p className="brand">{item.brand}</p>
+      <p className="price">₹{item.price}</p>
+      <p>{item.description}</p>
+
+      <p>
+        <b>Colors:</b> {item.colors?.join(", ")}
+      </p>
+
+      <p>
+        <b>Features:</b> {item.features?.join(", ")}
+      </p>
+
+      <button>View Product</button>
+    </div>
+  );
+}
 
 function App() {
-  const [categories, setCategories] = useState([]);
-  const [name, setName] = useState("");
-  const [parentCategory, setParentCategory] = useState("");
-  const [editId, setEditId] = useState(null);
-  const [openItems, setOpenItems] = useState({});
+  const [activeTab, setActiveTab] = useState("category");
+  const [view, setView] = useState("admin");
 
-  const fetchCategories = async () => {
-    const res = await axios.get(API_URL);
-    setCategories(res.data);
+  const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
+
+  const [categoryName, setCategoryName] = useState("");
+  const [parentCategory, setParentCategory] = useState("");
+
+  const [product, setProduct] = useState({
+    name: "",
+    price: "",
+    brand: "",
+    description: "",
+    stock: "",
+    features: "",
+    colors: "",
+    categories: [],
+  });
+
+  const [selectedImages, setSelectedImages] = useState({});
+
+  const fetchData = async () => {
+    const catRes = await axios.get(CATEGORY_API);
+    const prodRes = await axios.get(PRODUCT_API);
+
+    setCategories(catRes.data);
+    setProducts(prodRes.data);
   };
 
   useEffect(() => {
-    fetchCategories();
+    fetchData();
   }, []);
 
-  const buildTree = (items) => {
-    const map = {};
-    const roots = [];
-
-    items.forEach((item) => {
-      map[item._id] = { ...item, children: [] };
-    });
-
-    items.forEach((item) => {
-      const parentId = item.parentCategory?._id || item.parentCategory;
-
-      if (parentId && map[parentId]) {
-        map[parentId].children.push(map[item._id]);
-      } else {
-        roots.push(map[item._id]);
-      }
-    });
-
-    return roots;
-  };
-
-  const toggleOpen = (id) => {
-    setOpenItems((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
-  };
-
-  const renderTree = (nodes, level = 0) => {
-    return nodes.map((node) => (
-      <div key={node._id} className="tree-item" style={{ marginLeft: level * 24 }}>
-        <div className="tree-row" onClick={() => toggleOpen(node._id)}>
-          <span className="arrow">
-            {node.children.length > 0 ? (openItems[node._id] ? "▼" : "▶") : "•"}
-          </span>
-          <span className="tree-name">{node.name}</span>
-        </div>
-
-        {openItems[node._id] && node.children.length > 0 && (
-          <div>{renderTree(node.children, level + 1)}</div>
-        )}
-      </div>
-    ));
-  };
-
-  const handleSubmit = async (e) => {
+  const addCategory = async (e) => {
     e.preventDefault();
 
-    if (!name.trim()) {
+    if (!categoryName.trim()) {
       alert("Please enter category name");
       return;
     }
 
-    const data = {
-      name,
+    await axios.post(CATEGORY_API, {
+      name: categoryName,
       parentCategory: parentCategory || null,
+    });
+
+    setCategoryName("");
+    setParentCategory("");
+    fetchData();
+  };
+
+  const handleProductChange = (e) => {
+    setProduct({ ...product, [e.target.name]: e.target.value });
+  };
+
+  const handleCategorySelect = (e) => {
+    const selected = Array.from(
+      e.target.selectedOptions,
+      (option) => option.value
+    );
+
+    setProduct({ ...product, categories: selected });
+  };
+
+  const addProduct = async (e) => {
+    e.preventDefault();
+
+    const data = {
+      ...product,
+      price: Number(product.price),
+      stock: Number(product.stock),
+      features: product.features
+        ? product.features.split(",").map((item) => item.trim())
+        : [],
+      colors: product.colors
+        ? product.colors.split(",").map((item) => item.trim())
+        : [],
     };
 
-    try {
-      if (editId) {
-        await axios.put(`${API_URL}/${editId}`, data);
-        setEditId(null);
-      } else {
-        await axios.post(API_URL, data);
-      }
+    await axios.post(PRODUCT_API, data);
 
-      setName("");
-      setParentCategory("");
-      fetchCategories();
+    setProduct({
+      name: "",
+      price: "",
+      brand: "",
+      description: "",
+      stock: "",
+      features: "",
+      colors: "",
+      categories: [],
+    });
+
+    fetchData();
+  };
+
+  const uploadImage = async (productId) => {
+    const file = selectedImages[productId];
+
+    if (!file) {
+      alert("Please select image first");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    await axios.post(`${PRODUCT_API}/${productId}/images`, formData);
+
+    setSelectedImages({ ...selectedImages, [productId]: null });
+    fetchData();
+  };
+
+  const deleteImage = async (productId, imageId) => {
+    await axios.delete(`${PRODUCT_API}/${productId}/images/${imageId}`);
+    fetchData();
+  };
+
+  const moveImageUp = async (productId, imageId) => {
+    await axios.put(`${PRODUCT_API}/${productId}/images/${imageId}/up`);
+    fetchData();
+  };
+
+  const moveImageDown = async (productId, imageId) => {
+    await axios.put(`${PRODUCT_API}/${productId}/images/${imageId}/down`);
+    fetchData();
+  };
+
+  const publishProduct = async (productId) => {
+    try {
+      await axios.put(`${PRODUCT_API}/${productId}/publish`);
+      alert("Product added to website successfully");
+      fetchData();
     } catch (error) {
       alert(error.response?.data?.message || "Something went wrong");
     }
   };
 
-  const handleEdit = (cat) => {
-    setEditId(cat._id);
-    setName(cat.name);
-    setParentCategory(cat.parentCategory?._id || "");
-    window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
-  };
-
-  const handleDelete = async (id) => {
-    try {
-      if (window.confirm("Are you sure you want to delete this category?")) {
-        await axios.delete(`${API_URL}/${id}`);
-        fetchCategories();
-      }
-    } catch (error) {
-      alert(error.response?.data?.message || "Something went wrong");
-    }
-  };
-
-  const cancelEdit = () => {
-    setEditId(null);
-    setName("");
-    setParentCategory("");
-  };
-
-  const treeData = buildTree(categories);
+  const publishedProducts = products.filter((item) => item.isPublished);
 
   return (
     <div className="app">
-      <section className="hero">
-        <h1>Restaurant Menu</h1>
-        <p>Clickable parent-child category hierarchy</p>
-      </section>
+      <div className="topbar">
+        <h1> Admin Panel</h1>
 
-      <section className="menu-section">
-        <div className="menu-card">
-          <h2>Menu Categories</h2>
-
-          {treeData.length > 0 ? (
-            <div className="tree">{renderTree(treeData)}</div>
-          ) : (
-            <p className="empty">No menu categories added yet</p>
-          )}
+        <div>
+          <button onClick={() => setView("admin")}>Admin Dashboard</button>
+          <button onClick={() => setView("customer")}>
+            Customer Dashboard
+          </button>
         </div>
-      </section>
+      </div>
 
-      <section className="manager-title">
-        <h1>Menu Manager</h1>
-        <p>Add, edit and delete restaurant menu categories</p>
-      </section>
+      {view === "admin" ? (
+        <>
+          <div className="tabs">
+            <button onClick={() => setActiveTab("category")}>
+              Add Category
+            </button>
+            <button onClick={() => setActiveTab("product")}>
+              Add Product
+            </button>
+          </div>
 
-      <section className="dashboard">
-        <div className="card form-card">
-          <h2>{editId ? "Edit Category" : "Add Category"}</h2>
+          {activeTab === "category" && (
+            <form className="form-card" onSubmit={addCategory}>
+              <h2>Add Category</h2>
 
-          <form onSubmit={handleSubmit}>
-            <label>Category Name</label>
-            <input
-              type="text"
-              placeholder="Example: Drinks, Cold Drinks, Mojito"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
+              <input
+                type="text"
+                placeholder="Category name"
+                value={categoryName}
+                onChange={(e) => setCategoryName(e.target.value)}
+              />
 
-            <label>Parent Category</label>
-            <select
-              value={parentCategory}
-              onChange={(e) => setParentCategory(e.target.value)}
-            >
-              <option value="">None - Parent Category</option>
+              <select
+                value={parentCategory}
+                onChange={(e) => setParentCategory(e.target.value)}
+              >
+                <option value="">None - Parent Category</option>
 
-              {categories
-                .filter((cat) => cat._id !== editId)
-                .map((cat) => (
+                {categories.map((cat) => (
                   <option key={cat._id} value={cat._id}>
                     {cat.name}
                   </option>
                 ))}
-            </select>
+              </select>
 
-            <div className="btn-group">
-              <button className="primary-btn" type="submit">
-                {editId ? "Update Category" : "Add Category"}
-              </button>
+              <button type="submit">Save Category</button>
+            </form>
+          )}
 
-              {editId && (
-                <button className="cancel-btn" type="button" onClick={cancelEdit}>
-                  Cancel
-                </button>
-              )}
-            </div>
-          </form>
-        </div>
+          {activeTab === "product" && (
+            <form className="form-card" onSubmit={addProduct}>
+              <h2>Add Product</h2>
 
-        <div className="card table-card">
-          <div className="table-header">
-            <h2>Category Records</h2>
-            <span>{categories.length} Categories</span>
+              <input
+                name="name"
+                placeholder="Product Name"
+                value={product.name}
+                onChange={handleProductChange}
+              />
+
+              <input
+                name="price"
+                placeholder="Price"
+                value={product.price}
+                onChange={handleProductChange}
+              />
+
+              <input
+                name="brand"
+                placeholder="Brand"
+                value={product.brand}
+                onChange={handleProductChange}
+              />
+
+              <input
+                name="stock"
+                placeholder="Stock"
+                value={product.stock}
+                onChange={handleProductChange}
+              />
+
+              <input
+                name="features"
+                placeholder="Features comma separated"
+                value={product.features}
+                onChange={handleProductChange}
+              />
+
+              <input
+                name="colors"
+                placeholder="Colors comma separated"
+                value={product.colors}
+                onChange={handleProductChange}
+              />
+
+              <textarea
+                name="description"
+                placeholder="Description"
+                value={product.description}
+                onChange={handleProductChange}
+              />
+
+              <label>Select Multiple Categories</label>
+
+              <select
+                multiple
+                value={product.categories}
+                onChange={handleCategorySelect}
+              >
+                {categories.map((cat) => (
+                  <option key={cat._id} value={cat._id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+
+              <button type="submit">Save Product</button>
+            </form>
+          )}
+
+          <h2 className="section-title">Product Management</h2>
+
+          <div className="products">
+            {products.map((item) => (
+              <div className="product-card" key={item._id}>
+                <div className="status">
+                  {item.isPublished ? "Published on Website" : "Draft / Locked"}
+                </div>
+
+                <h2>{item.name}</h2>
+
+                <p>
+                  <b>Brand:</b> {item.brand}
+                </p>
+
+                <p>
+                  <b>Price:</b> ₹{item.price}
+                </p>
+
+                <p>
+                  <b>Stock:</b> {item.stock}
+                </p>
+
+                <p>
+                  <b>Description:</b> {item.description}
+                </p>
+
+                <p>
+                  <b>Categories:</b>{" "}
+                  {item.categories?.map((cat) => cat.name).join(", ")}
+                </p>
+
+                <p>
+                  <b>Features:</b> {item.features?.join(", ")}
+                </p>
+
+                <p>
+                  <b>Colors:</b> {item.colors?.join(", ")}
+                </p>
+
+                {!item.isPublished && (
+                  <>
+                    <div className="upload-box">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) =>
+                          setSelectedImages({
+                            ...selectedImages,
+                            [item._id]: e.target.files[0],
+                          })
+                        }
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() => uploadImage(item._id)}
+                      >
+                        Upload Image
+                      </button>
+                    </div>
+
+                    <div className="image-gallery">
+                      {item.images?.map((img) => (
+                        <div className="image-card" key={img._id}>
+                          <img src={img.url} alt={item.name} />
+
+                          <div className="image-actions">
+                            <button
+                              onClick={() => moveImageUp(item._id, img._id)}
+                            >
+                              ↑
+                            </button>
+
+                            <button
+                              onClick={() => moveImageDown(item._id, img._id)}
+                            >
+                              ↓
+                            </button>
+
+                            <button
+                              onClick={() => deleteImage(item._id, img._id)}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <button
+                      className="publish-btn"
+                      disabled={!item.images || item.images.length === 0}
+                      onClick={() => publishProduct(item._id)}
+                    >
+                      Add Product to Website
+                    </button>
+                  </>
+                )}
+
+                {item.isPublished && (
+                  <p className="locked-text">
+                    Product is locked and visible on customer dashboard.
+                  </p>
+                )}
+              </div>
+            ))}
           </div>
+        </>
+      ) : (
+        <>
+          <h2 className="section-title">Customer Dashboard</h2>
 
-          <table>
-            <thead>
-              <tr>
-                <th>Category</th>
-                <th>Parent</th>
-                <th>Type</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
+          <div className="customer-products">
+            {publishedProducts.map((item) => (
+              <CustomerProductCard key={item._id} item={item} />
+            ))}
 
-            <tbody>
-              {categories.map((cat) => (
-                <tr key={cat._id}>
-                  <td className="category-name">{cat.name}</td>
-                  <td>{cat.parentCategory ? cat.parentCategory.name : "None"}</td>
-                  <td>
-                    <span className={cat.parentCategory ? "child-badge" : "parent-badge"}>
-                      {cat.parentCategory ? "Child" : "Parent"}
-                    </span>
-                  </td>
-                  <td>
-                    <button className="edit-btn" onClick={() => handleEdit(cat)}>
-                      Edit
-                    </button>
-                    <button className="delete-btn" onClick={() => handleDelete(cat._id)}>
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-
-              {categories.length === 0 && (
-                <tr>
-                  <td colSpan="4" className="empty">
-                    No categories added yet
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
+            {publishedProducts.length === 0 && (
+              <h3>No products added to website yet.</h3>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }
