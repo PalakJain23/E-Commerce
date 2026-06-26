@@ -1,6 +1,6 @@
-# 🛒 Amazon Style Product Management System
+# 🛒 Product Management System
 
-A full-stack Amazon-inspired Product Management System built using **React.js, Node.js, Express.js, MongoDB, and Multer**. The platform allows administrators to manage hierarchical categories, products, multiple product images, and publishing workflows while providing customers with a clean product browsing experience.
+A full-stack Product Management System built using **React.js, Node.js, Express.js, MongoDB, and Multer**. The platform allows administrators to manage hierarchical categories, products, multiple product images, and publishing workflows while providing customers with a clean product browsing experience.
 
 ---
 
