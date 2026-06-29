@@ -111,6 +111,20 @@ function AdminDashboard({
     fetchData();
   };
 
+  const deleteProduct = async (productId) => {
+    const confirmed = window.confirm("Are you sure you want to delete this product?");
+
+    if (!confirmed) return;
+
+    try {
+      await axios.delete(`${PRODUCT_API}/${productId}`);
+      alert("Product deleted successfully");
+      fetchData();
+    } catch (error) {
+      alert(error.response?.data?.message || "Something went wrong");
+    }
+  };
+
   const publishProduct = async (productId) => {
     try {
       await axios.put(`${PRODUCT_API}/${productId}/publish`);
@@ -209,6 +223,10 @@ function AdminDashboard({
             <p><b>Categories:</b> {item.categories?.map((cat) => cat.name).join(", ")}</p>
             <p><b>Features:</b> {item.features?.join(", ")}</p>
             <p><b>Colors:</b> {item.colors?.join(", ")}</p>
+
+            <button type="button" onClick={() => deleteProduct(item._id)}>
+              Delete Product
+            </button>
 
             {!item.isPublished && (
               <>
